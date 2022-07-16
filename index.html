@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Paediatric Anaesthetic Calculator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="header">
+      <div class="input">
+        <label for="weight">Weight (kg)</label>
+        <input
+          id="weight"
+          type="number"
+          onchange="update()"
+          onkeyup="update()"
+        />
+      </div>
+    </div>
+    <div id="main"></div>
+    <script>
+      const drugs = [
+        { name: "3in1 Fentanyl Inf / 50 mL", dose: 250, unit: "mcg" },
+        { name: "3in1 Midazolam inf /50mL", dose: 3, unit: "mg" },
+        { name: "3in1 Rocuronium Inf/50mL", dose: 25, unit: "mg" },
+        { name: "Adenosine 1st bolus (max 6 mg)", dose: 0.1, unit: "mg" },
+        { name: "Adenosine 2nd bolus (max 12 mg)", dose: 0.2, unit: "mg" },
+        { name: "Adrenaline", dose: 10, unit: "mcg" },
+        { name: "Adrenaline Inf/50mL", dose: 0.3, unit: "mg" },
+        { name: "Amiodarone inf per 50 ml D5W", dose: 15, unit: "mg" },
+        { name: "Amiodarone IV", dose: 5, unit: "mg" },
+        { name: "Atracurium IV", dose: 0.5, unit: "mg" },
+        { name: "Atropine IV", dose: 20, unit: "mcg" },
+        { name: "Bicarb (8.4%)", dose: 1, unit: "ml" },
+        { name: "CaCl2 (10%)", dose: 0.2, unit: "ml" },
+        { name: "Cefazolin", dose: 50, unit: "mg" },
+        { name: "Chloral Hydrate PO Premed", dose: 50, unit: "mg" },
+        { name: "Clonidine IN Premed", dose: 2, unit: "mcg" },
+        { name: "Clonidine PO Premed", dose: 4, unit: "mcg" },
+        { name: "Defibrillation", dose: 4, unit: "J" },
+        { name: "Dexamethasone IV", dose: 0.2, unit: "mg" },
+        { name: "Dexmedetomidine IN Premed", dose: 2, unit: "mcg" },
+        { name: "Dexmedetomidine Inf /50mL", dose: 10, unit: "mcg" },
+        { name: "Dobutamine Inf/50 mL", dose: 15, unit: "mg" },
+        { name: "Dopamine Inf/50mL", dose: 30, unit: "mg" },
+        { name: "Etomidate IV Induction", dose: 0.2, unit: "mg" },
+        { name: "Fentanyl IV", dose: 20, unit: "mcg" },
+        { name: "GTN/ Inf/50 mL (max 50)", dose: 3, unit: "mg" },
+        { name: "Heparin", dose: 300, unit: "IU" },
+        { name: "Isoprenaline Inf/50mL", dose: 0.3, unit: "mg" },
+        { name: "Ketamine IM Induction", dose: 5, unit: "mg" },
+        { name: "Ketamine IM Premed", dose: 3, unit: "mg" },
+        { name: "Ketamine IN Premed", dose: 5, unit: "mg" },
+        { name: "Ketamine IV Induction", dose: 2, unit: "mg" },
+        { name: "Ketamine PO Premed", dose: 6, unit: "mg" },
+        { name: "Ketamine PO w Midazolam Premed", dose: 2.5, unit: "mg" },
+        { name: "Lignocaine (1%)", dose: 1, unit: "mg" },
+        { name: "MgSO4", dose: 50, unit: "mg" },
+        { name: "Midazolam IM Premed", dose: 0.2, unit: "mg" },
+        { name: "Midazolam IN Premed", dose: 0.2, unit: "mg" },
+        { name: "Midazolam IV Premed", dose: 0.1, unit: "mg" },
+        { name: "Midazolam PO Premed", dose: 0.5, unit: "mg" },
+        { name: "Midazolam PO w Ketamine Premed", dose: 0.25, unit: "mg" },
+        { name: "Milrinone Inf /50 mL (max 50) ", dose: 3, unit: "mg" },
+        { name: "Morphine Inf /50mL (max 50)", dose: 1, unit: "mg" },
+        { name: "Morphine IV", dose: 0.05, unit: "MG" },
+        { name: "Neostigmine IV", dose: 50, unit: "mcg" },
+        { name: "Noradrenaline Inf/50mL", dose: 0.3, unit: "mg" },
+        { name: "Ondansetron IV", dose: 0.1, unit: "mg" },
+        { name: "Phentolamine Inf/50 mL", dose: 15, unit: "mg" },
+        { name: "Phenylephrine", dose: 10, unit: "mcg" },
+        { name: "Propofol IV Induction", dose: 2, unit: "mg" },
+        { name: "Protamine", dose: 3, unit: "mg" },
+        { name: "Rocuronium IV", dose: 0.6, unit: "mg" },
+        { name: "Sugammadex IV", dose: 2, unit: "mg" },
+        { name: "Suxamethonium IM", dose: 4, unit: "mg" },
+        { name: "Suxamethonium IV", dose: 2, unit: "mg" },
+        { name: "Sync Cardioversion", dose: 0.5, unit: "J" },
+        { name: "Thiopentone IV Induction", dose: 4, unit: "mg" },
+        { name: "Tranxemic acid Inf/20 ml (max 2000) ", dose: 50, unit: "mg" },
+        { name: "Vasopressin", dose: 0.1, unit: "unit" },
+        { name: "Vasopressin Inf /50mL", dose: 18, unit: "unit" },
+      ];
+
+      // get highlighted drugs from localstorage
+      var highlighted = JSON.parse(localStorage.getItem("highlighted") || "[]");
+      if (!Array.isArray(highlighted)) {
+        highlighted = [];
+      }
+
+      // toggle highlighted drug and save to localstorage
+      function toggleHighlight(name) {
+        const index = highlighted.indexOf(name);
+        if (index > -1) {
+          if (confirm(`Remove "${name}"?`) == true)
+            highlighted.splice(index, 1);
+        } else {
+          if (confirm(`Add "${name}"?`) == true) highlighted.push(name);
+        }
+        localStorage.setItem("highlighted", JSON.stringify(highlighted));
+        update();
+      }
+
+      // create table from data
+      function createTable(data, columnDefs, header = true) {
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const tbody = document.createElement("tbody");
+        const createRow = (rowData) => {
+          const tr = document.createElement("tr");
+          columnDefs.forEach((col) => {
+            const td = document.createElement("td");
+            td.className = col.name;
+            td.innerHTML = rowData[col.name];
+            // attach onClick event handler if set
+            if ("onClick" in col) {
+              td.addEventListener("click", () => {
+                col.onClick(rowData[col.name]);
+              });
+              td.style.cursor = "pointer";
+            }
+            tr.append(td);
+          });
+          return tr;
+        };
+        // create table heading
+        const tr = document.createElement("tr");
+        columnDefs.forEach((col) => {
+          const th = document.createElement("th");
+          th.className = col.name;
+          th.appendChild(document.createTextNode(col.label));
+          tr.append(th);
+        });
+        thead.append(tr);
+        // create table body
+        if (header) table.appendChild(thead);
+        data.forEach((rowData) => {
+          tbody.appendChild(createRow(rowData));
+        });
+        table.appendChild(tbody);
+        return table;
+      }
+
+      // get number of digits after decimal point
+      function getPrecision(number) {
+        const str = `${number}`;
+        if (str.indexOf(".") > -1) {
+          return str.length - 1 - str.indexOf(".");
+        } else {
+          return 0;
+        }
+      }
+
+      function update() {
+        const weight = document.getElementById("weight").value;
+        const columnDefs = [
+          {
+            name: "name",
+            label: "Drug name",
+            onClick: (value) => {
+              toggleHighlight(value);
+            },
+          },
+          { name: "unitDose", label: "" },
+          { name: "dose", label: "Dose" },
+          { name: "unit", label: "" },
+        ];
+        const data = drugs.map((drug) => {
+          const precision = getPrecision(drug.dose);
+          const dose = (drug.dose * weight).toFixed(precision);
+          return {
+            name: drug.name,
+            unitDose: `${drug.dose}`,
+            dose: `${dose}`,
+            unit: `${drug.unit}`,
+          };
+        });
+        // filter data based on highlighted names
+        const pinnedTable = createTable(
+          data.filter((row) => highlighted.includes(row.name)),
+          columnDefs
+        );
+        pinnedTable.className = "pinned";
+        const otherTable = createTable(
+          data.filter((row) => !highlighted.includes(row.name)),
+          columnDefs,
+          false
+        );
+        const container = document.getElementById("main");
+        container.innerHTML = "";
+        container.appendChild(pinnedTable);
+        container.appendChild(otherTable);
+      }
+
+      window.onload = function () {
+        document.getElementById("weight").focus();
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overscroll-behavior-y: none;
+  overflow: hidden;
+  font-size: 16px;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+}
+#header {
+  flex: 0;
+  padding: 0.5rem;
+}
+#header {
+  display: flex;
+  flex-direction: column;
+}
+#header .input {
+  display: flex;
+}
+#header .input label {
+  width: 12ch;
+  flex: none;
+  padding: 0.5rem 0;
+}
+#header .input input {
+  flex: 1;
+  font-size: 1rem;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+#main {
+  flex: 1;
+  overflow: auto;
+}
+#main table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+#main table.pinned {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-bottom: 5px solid #ccc;
+}
+#main table tr {
+  border-bottom: 1px solid #8883;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+#main table td,
+#main table th {
+  padding: 0.5rem;
+  text-align: left;
+}
+#main table th {
+  font-size: 0.8rem;
+}
+#main table td.name {
+  width: 56%;
+  font-size: 0.9rem;
+}
+#main table td.unitDose {
+  text-align: right;
+  width: 12%;
+  font-size: 0.9rem;
+  border-right: 1px solid #8883;
+}
+#main table td.dose {
+  text-align: right;
+  width: 12%;
+}
+#main table td.unit {
+  text-align: left;
+  width: min-content;
+  padding-left: 0;
+  width: 10%;
+  font-size: 0.9rem;
+}
